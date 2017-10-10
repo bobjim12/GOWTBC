@@ -141,7 +141,7 @@ def main():
         return weapon_list[weapon]
 
 
-#when selecting a character, cog selects their tema first, then locust
+#when selecting a character, cog selects their team first, then locust
     def characters_select():
 
         chosen_cog = []
