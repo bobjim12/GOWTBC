@@ -1,6 +1,6 @@
 # GOWTBC
 
-GOWTBC stand for Gears of war turn-based combat.
+GOWTBC stands for Gears of war turn-based combat.
 
 The characters and weapons referred to in the game are based on those found in the computer game Gears of War (property of Microsoft and The Coalition).
 
