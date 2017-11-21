@@ -5,10 +5,11 @@ from time import sleep
 from sys import exit
 
 Characters = { "COG": ["MARCUS" ,"DOM", "BAIRD", "COLE", "CARMINE", "KEZDREW"], "LOCUST": ["MYRRAH", "THERON", "DRONE", "GRENADIER", "SKORGE", "RAAM"]}
-Character_Health = {"MARCUS": 80, "DOM": 80, "BAIRD": 70, "COLE": 100, "CARMINE": 60, "KEZDREW": 100, "MYRRAH": 90, "THERON": 70, "DRONE": 50, "GRENADIER": 70, "SKORGE": 85, "RAAM": 90}
+Character_Health = {"MARCUS": 80, "DOM": 2, "BAIRD": 70, "COLE": 100, "CARMINE": 60, "KEZDREW": 100, "MYRRAH": 90, "THERON": 70, "DRONE": 50, "GRENADIER": 70, "SKORGE": 85, "RAAM": 90}
 Character_Attack = {"MARCUS": 4, "DOM": 4, "BAIRD": 3, "COLE": 5, "CARMINE": 3, "KEZDREW": 3, "MYRRAH": 3, "THERON": 4, "DRONE": 3, "GRENADIER": 4, "SKORGE": 5, "RAAM": 4}
 Character_weapons = {"MARCUS": ["frag", "lancer", "chainsaw"], "DOM": ["frag", "gnasher"], "BAIRD": ["longshot"], "COLE": ["frag", "boomshot", "boltok"], "CARMINE": ["frag", "lancer", "chainsaw"], "KEZDREW": ["chainsaw", "ink", "gnasher"],
                      "MYRRAH": ["frag", "gorgon"], "THERON": ["torque bow", "gorgon"], "DRONE": ["frag", "hammerburst"], "GRENADIER": ["frag", "gnasher"], "SKORGE": ["gorgon", "ink", "chainsaw"], "RAAM": ["frag","boltok"]}
+
 
 
 #list of characters that the users uses as their 'team'
@@ -23,27 +24,88 @@ next_turn_faction = "COG"
 def main():
 
 
+    def explosive_attack():
+
+        if weapon == "frag":
+            print(attacker, "Throwing ", weapon, "!")
+        elif weapon == "boomshot":
+            print("BOOOOOM BABY!")
+        elif weapon == "torque bow":
+            print("HOSTILES!!")  # theron trademark line
+        sleep(1)
+        missed = randint(1, 2)
+        if missed == 2:
+            print(attacker, "missed!")
+            weapon = ""
+        else:
+            # ink grenade deals damage over time, as the victim continues to breath in the poison
+            if weapon == "ink":
+                for i in range(1, randint(2, 5)):
+                    Character_Health[victim] -= 3 * i
+                    get_player_health(victim)
+                    sleep(.5)
+                print("")
+                weapon = ""
+        return weapon
+
+    def chainsaw_attack():
+
+        success = randint(1, 7)
+        if success > Character_Attack[attacker]:
+            print("The attack was unsuccessful")
+            Character_Health[attacker] -= 10 * randint(2, 3)
+            get_player_health(attacker)
+        else:
+            # ..and even if they get a chance to reach the victim, they could be met with the very same weapon...
+            if victim in ["SKORGE", "CARMINE", "MARCUS"]:
+                attacker_fight = randint(1, 5) * Character_Attack[attacker]
+                victim_fight = randint(1, 5) * Character_Attack[victim]
+                sleep(1)
+                if attacker_fight == victim_fight:
+                    print("It's a draw")
+                elif victim_fight > attacker_fight:
+                    Character_Health[victim] -= 5 * randint(1, 4)
+                    Character_Health[attacker] = 0
+                    print(attacker, "got chainsawed")
+            else:
+                # ..or the victim could be hopeless and reach an inevitable death
+                Character_Health[attacker] -= 5 * randint(1, 4)
+                Character_Health[victim] = 0
+                print(victim, "got chainsawed")
+                get_player_health(attacker)
+        weapon = "" # returns empty string to show that attack has already been completed.
+        return weapon
+
+    def cole_frenzy():
+
+        sleep(1)
+        print("Cole: NUMBER 83, THE COLE TRAIN!!")
+        sleep(1)
+        print("Cole has gone into a melee frenzy!")
+        Character_Health[victim] -= Character_Attack[attacker] * randint(2, 3)
+        Character_Health[attacker] -= Character_Attack[victim] * randint(1, 2)
+        get_player_health(attacker)
+
+
+    def suicide():
+
+        Character_Health[attacker] = 0
+        if attacker == "DOM":
+            # Dom has the chance to kill both his victim and himself
+            print("Dom goes suicidal, blowing himself and", victim, "to pieces!")
+            Character_Health[victim] = 0
+        else:
+            print("Cole blew himself up!")
+
 #where damage is calculated....
     def damage(attacker, victim, weapon):
 
         #there is a slim chance that if the attacker is Cole, then he will have his own special attack
         if weapon == "Cole frenzy":
-
-            sleep(1)
-            print("Cole: NUMBER 83, THE COLE TRAIN!!")
-            sleep(1)
-            print("Cole has gone into a melee frenzy!")
-            Character_Health[victim] -= Character_Attack[attacker] * randint(2, 3)
-            Character_Health[attacker] -= Character_Attack[victim] * randint(1, 2)
-            get_player_health(attacker)
+            cole_frenzy()
         elif weapon == "suicide":
-            Character_Health[attacker] = 0
-            if attacker == "DOM":
-                #Dom has the chance to kill both his victim and himself
-                print("Dom goes suicidal, blowing himself and", victim, "to pieces!")
-                Character_Health[victim] = 0
-            else:
-                print("Cole blew himself up!")
+            suicide()
+
 
         else:
             print(attacker, " attacks ", victim, " with ", weapon)
@@ -51,53 +113,14 @@ def main():
 
             #A chainsaw attack is risky, there is a chance to battle is too hot and the attacker has to back out of the attack...
             if weapon == "chainsaw":
-                success = randint(1, 7)
-                if success > Character_Attack[attacker]:
-                    print("The attack was unsuccessful")
-                    Character_Health[attacker] -= 10 * randint(2, 3)
-                    get_player_health(attacker)
-                else:
-                    #..and even if they get a chance to reach the victim, they could be met with the very same weapon...
-                    if victim == "SKORGE" or victim == "CARMINE" or victim == "MARCUS":
-                        attacker_fight = randint(1, 5) * Character_Attack[attacker]
-                        victim_fight = randint(1, 5) * Character_Attack[victim]
-                        sleep(1)
-                        if attacker_fight == victim_fight:
-                            print("It's a draw")
-                        elif victim_fight > attacker_fight:
-                            Character_Health[victim] -= 5 * randint(1, 4)
-                            Character_Health[attacker] = 0
-                            print(attacker, "got chainsawed")
-                    else:
-                        #..or the victim could be hopeless and reach an inevitable death
-                        Character_Health[attacker] -= 5 * randint(1, 4)
-                        Character_Health[victim] = 0
-                        print(victim, "got chainsawed")
-                        get_player_health(attacker)
-                weapon = ""
+
+                chainsaw_attack()
+
 
             #explosives and thrown weapons have a chance of msissing
-            if weapon == "ink" or weapon == "frag" or weapon == "boomshot" or weapon == "torque bow":
-                if weapon == "frag":
-                    print(attacker, "Throwing ", weapon, "!")
-                elif weapon == "boomshot":
-                    print("BOOOOOM BABY!")
-                elif weapon == "torque bow":
-                    print("HOSTILES!!") #theron trademark line
-                sleep(1)
-                missed = randint(1, 2)
-                if missed == 2:
-                    print(attacker, "missed!")
-                    weapon = ""
-                else:
-                    #ink grenade deals damage over time, as the victim continues to breath in the poison
-                    if weapon == "ink" :
-                        for i in range(1, randint(2, 5)):
-                            Character_Health[victim] -= 3 * i
-                            get_player_health(victim)
-                            sleep(.5)
-                        print ("")
-                        weapon = ""
+            if weapon in ["ink", "frag", "boomshot", "torque bow"]:
+
+                explosive_attack()
 
             # some weapons are so strong they can insta kill their victims
             if weapon in ["longshot", "boltok", "torque bow", "frag", "boomshot"]:
@@ -120,6 +143,8 @@ def main():
 
 # when choosing a weapon, the user is presented with a numbered list of options, to which they will need to enter exactly that number otherwise he will continue to ask
     def weapon_select(weapon_list, dom):
+
+        selected_weapon = ""
         weapon_display = ""
         for i in range(0, len(weapon_list)):
             weapon_display = weapon_display + weapon_list[i] + ": " + str(i+1) + " "
@@ -127,6 +152,7 @@ def main():
             try:
                 weapon = int(input(weapon_display)) - 1
                 if weapon >= 0 and weapon < len(weapon_list) :
+                    selected_weapon = weapon_list[weapon]
                     break
                 else:
                     print("invalid selection")
@@ -137,8 +163,8 @@ def main():
         if (weapon_list[weapon] == "frag" and dom == True) or weapon_list[weapon] == "boomshot":
             suicide = randint(1,10)
             if suicide == 1:
-                weapon_list[weapon] = "suicide"
-        return weapon_list[weapon]
+                selected_weapon = "suicide"
+        return selected_weapon
 
 
 #when selecting a character, cog selects their team first, then locust
@@ -230,9 +256,9 @@ def main():
     #although if one team has no more players, then the game ends. A draw is also possible.
     def display_teams():
             print ("")
-            Selected_Characters["COG"] = get_team_health(Selected_Characters["COG"])
+            get_team_health("COG")
             print("")
-            Selected_Characters["LOCUST"] = get_team_health(Selected_Characters["LOCUST"])
+            get_team_health("LOCUST")
 
             locust_left = len(Selected_Characters["LOCUST"])
             cog_left = len(Selected_Characters["COG"])
@@ -247,13 +273,12 @@ def main():
                 print("COG win!")
                 exit()
 
-    #players who have <= 0 health are removed from the original list
+    #players who have <= 0 health are removed from the list
     # NB not efficient method if each team was very large
-    def get_team_health(list):
-        list = [x for x in list if Character_Health[x] > 0]
-        for thing in list:
+    def get_team_health(faction):
+        Selected_Characters[faction] = [x for x in Selected_Characters[faction]  if Character_Health[x] > 0]
+        for thing in Selected_Characters[faction] :
             print (thing, " health: ", Character_Health[thing])
-        return list
 
 
     def get_player_health(player):
