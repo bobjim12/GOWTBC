@@ -282,9 +282,9 @@ def main():
 
         character_health = Character_Health[player]
 
+        # players who have <= 0 health are removed from their respective Selected_Characters list
         if character_health < 0:
             character_health = 0
-            # players who have <= 0 health are removed from their respective Selected_Characters list
             if Selected_Characters["COG"].__contains__(player):
                 Selected_Characters["COG"].remove(player)
 
