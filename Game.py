@@ -276,15 +276,24 @@ def main():
     #players who have <= 0 health are removed from the list
     # NB not efficient method if each team was very large
     def get_team_health(faction):
-        Selected_Characters[faction] = [x for x in Selected_Characters[faction]  if Character_Health[x] > 0]
         for thing in Selected_Characters[faction] :
             print (thing, " health: ", Character_Health[thing])
 
 
     def get_player_health(player):
-        if Character_Health[player] < 0:
-            Character_Health[player] = 0
-        return print(player + "'s health is now", Character_Health[player])
+
+        character_health = Character_Health[player]
+
+        if character_health < 0:
+            character_health = 0
+
+            if Selected_Characters["COG"].__contains__(player):
+                Selected_Characters["COG"].remove(player)
+
+            elif Selected_Characters["LOCUST"].__contains__(player):
+                Selected_Characters["LOCUST"].remove(player)
+
+        return print(player + "'s health is now", character_health)
 
     characters_select()
     attack()
