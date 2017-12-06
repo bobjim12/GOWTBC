@@ -273,8 +273,6 @@ def main():
                 print("COG win!")
                 exit()
 
-    #players who have <= 0 health are removed from the list
-    # NB not efficient method if each team was very large
     def get_team_health(faction):
         for thing in Selected_Characters[faction] :
             print (thing, " health: ", Character_Health[thing])
@@ -286,7 +284,7 @@ def main():
 
         if character_health < 0:
             character_health = 0
-
+            # players who have <= 0 health are removed from their respective Selected_Characters list
             if Selected_Characters["COG"].__contains__(player):
                 Selected_Characters["COG"].remove(player)
 
